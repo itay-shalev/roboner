@@ -35,7 +35,9 @@ void setup()
   pinMode(IR_LL, INPUT);
   pinMode(IR_FR, INPUT);
   pinMode(IR_FL, INPUT);
+  
   Serial.begin(9600);
+	mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G);
 }
 
 void loop() 
@@ -114,6 +116,7 @@ double getYaw()
 {
   timer = millis();
 	Vector norm = mpu.readNormalizeGyro();
+  
   yaw += norm.ZAxis * timeStep;
   delay(timeStep * 1000 - (millis - timer));
   return yaw;
