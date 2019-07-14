@@ -3,13 +3,16 @@
         {
             "name": "Win32",
             "includePath": [
+                "C:\\Users\\User\\Documents\\Arduino\\libraries\\MPU6050",
                 "D:\\arduino\\libraries\\I2Cdev",
                 "D:\\arduino\\libraries\\MPU6050",
                 "D:\\arduino\\tools\\**",
-                "D:\\arduino\\hardware\\arduino\\avr\\**"
+                "D:\\arduino\\hardware\\arduino\\avr\\**",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\**",
+                "C:\\Program Files (x86)\\Arduino\\tools\\**"
             ],
             "forcedInclude": [
-                "D:\\arduino\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
             ],
             "intelliSenseMode": "msvc-x64",
             "cStandard": "c11",

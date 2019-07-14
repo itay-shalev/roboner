@@ -16,17 +16,30 @@ const int IR_LR = A2;
 const int IR_LL = A3;
 const int IR_FR = A0;
 const int IR_FL = A1;
+//US CONNECTIONS
+const int US_FL = 46;
+const int US_FR = 48;
+const int US_RL = 44;
+const int US_RR = 42;
+const int US_BL = 40;
+const int US_LL = 38;
+const int US_LR = 36;
+const int US_BR = 34;
+
+
 //VAREABELS
 int speed = 100; 
 unsigned long timer = 0;
 double yaw = 0;
 float timeStep = 0.01;
+int us = US_RL;
 
 MPU6050 mpu;
-mpu.calibrateGyro();
 
 void setup() 
 {
+  mpu.begin();
+  mpu.calibrateGyro();
   pinMode(M_FL, OUTPUT);
   pinMode(M_FR, OUTPUT);
   pinMode(M_BL, OUTPUT);
@@ -35,22 +48,19 @@ void setup()
   pinMode(IR_LL, INPUT);
   pinMode(IR_FR, INPUT);
   pinMode(IR_FL, INPUT);
+  initUS(us);
   
   Serial.begin(9600);
-	mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G);
-}
+  
+  }
 
 void loop() 
 {
-  Serial.print("LR: ");
-  Serial.print(analogRead(IR_LR));
-  Serial.print(", LL: ");
-  Serial.print(analogRead(IR_LL));
-  Serial.print(", FL: ");
-  Serial.print(analogRead(IR_FL));
-  Serial.print(", FR: ");
-  Serial.print(analogRead(IR_FR));
+  //gyroDrive(90, 20);
+  Serial.print(readUS(us));
   Serial.print("\n");
+  delay(100);
+
 }
 
 void motorControl(int motor, int speed, int dir)
@@ -115,27 +125,94 @@ void motorInit(int motor)
 double getYaw()
 {
   timer = millis();
-	Vector norm = mpu.readNormalizeGyro();
+  Vector norm = mpu.readNormalizeGyro();
   
   yaw += norm.ZAxis * timeStep;
-  delay(timeStep * 1000 - (millis - timer));
+  delay(timeStep * 1000 - (millis() - timer));
   return yaw;
+}
+
+void turn(int speed, int dir)
+{
+  if (dir)
+  {
+    motorControl(M_FL, speed, FORWARD);
+    motorControl(M_FR, speed, FORWARD);
+    motorControl(M_BL, speed, FORWARD);
+    motorControl(M_BR, speed, FORWARD);
+  }
+  else
+  {
+    motorControl(M_FL, speed, BACKWARD);
+    motorControl(M_FR, speed, BACKWARD);
+    motorControl(M_BL, speed, BACKWARD);
+    motorControl(M_BR, speed, BACKWARD);
+  }
 }
 
 void gyroDrive(int angle, int speed)
 {
-  yaw = 0; //Resets the yaw of the robot.
-  int yawFix = 0;
-  while (abs(getYaw()) < angle)
+  // yaw = 0; //Resets the yaw of the robot.
+  angle -= speed / 2; //A fix for the degrees based on the offset caused by the speed.
+  Serial.print("Degrees: ");
+  Serial.print(angle);
+  Serial.print("\n");
+  if (angle > 0)
   {
-    if (angle > 0)
-    {
-      drive(speed, LEFT);
-    }
-    else if (angel < 0)
-    {
-      drive(speed, RIGHT);
-    }
-    
+    turn(speed, FORWARD);
   }
+  else if (angle < 0)
+  {
+    turn(speed, BACKWARD);
+  }
+  else
+  {
+    drive(speed, FORWARD);
+  }
+  while (abs(getYaw()) <= angle)
+  {
+    Serial.print(getYaw());
+    Serial.print("\n");
+  }
+  Serial.print(getYaw());
+  Serial.print("\n");
+  stopRobot();
 }
+
+void checkUS()
+{
+  double currVal = 0;
+  for (int i = 34; i <= 46; i += 2)
+  {
+    currVal = readUS(i);
+    Serial.print("US connected in ");
+    Serial.print(i);
+    Serial.print("  ");
+    Serial.print(currVal);
+    Serial.print("\n");
+    delay(3000);
+  }
+
+}
+
+double readUS(int US)
+{
+  int Echo = US;
+  int trig = US + 1;
+
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+
+  return pulseIn(Echo, HIGH) * 0.034 / 2;
+}
+
+void initUS(int US)
+{
+  pinMode(US, INPUT);
+  pinMode(US + 1, OUTPUT);
+}
+
