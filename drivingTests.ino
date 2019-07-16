@@ -1,4 +1,4 @@
-#include <Wire.h>
+  #include <Wire.h>
 #include <MPU6050.h>
 
 #define BACKWARD 0
@@ -32,7 +32,9 @@ int speed = 100;
 unsigned long timer = 0;
 double yaw = 0;
 float timeStep = 0.01;
-int us = US_RL;
+int us = US_FL;
+int ir = IR_FR;
+//LL
 
 MPU6050 mpu;
 
@@ -56,12 +58,19 @@ void setup()
 
 void loop() 
 {
-  //gyroDrive(90, 20);
-  Serial.print(readUS(us));
+  /*for (int i = 0; i < 4; i++){
+    gyroDrive(90, 70);
+    delay(2000);
+  }*/
+  /* Serial.print(readUS(us));
   Serial.print("\n");
-  delay(100);
-
+  delay(100);*/
+  Serial.print(readIR(ir));
+  Serial.print("\n");
+  //delay(100000);
 }
+
+
 
 void motorControl(int motor, int speed, int dir)
 {
@@ -152,11 +161,8 @@ void turn(int speed, int dir)
 
 void gyroDrive(int angle, int speed)
 {
-  // yaw = 0; //Resets the yaw of the robot.
-  angle -= speed / 2; //A fix for the degrees based on the offset caused by the speed.
-  Serial.print("Degrees: ");
-  Serial.print(angle);
-  Serial.print("\n");
+  yaw = 0; //Resets the yaw of the robot.
+  angle = angle - (speed / 2); //A fix for the degrees based on the offset caused by the speed.
   if (angle > 0)
   {
     turn(speed, FORWARD);
@@ -169,13 +175,10 @@ void gyroDrive(int angle, int speed)
   {
     drive(speed, FORWARD);
   }
-  while (abs(getYaw()) <= angle)
+  while (abs(yaw) <= angle)
   {
-    Serial.print(getYaw());
-    Serial.print("\n");
+    yaw = getYaw();
   }
-  Serial.print(getYaw());
-  Serial.print("\n");
   stopRobot();
 }
 
@@ -216,3 +219,7 @@ void initUS(int US)
   pinMode(US + 1, OUTPUT);
 }
 
+int readIR(int ir)
+{
+  return analogRead(ir);
+}
